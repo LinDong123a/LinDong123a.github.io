@@ -7,12 +7,12 @@ branches:
   only:
     - blog-resource
 script:
-  - hexo clean
   - hexo generate # generate static files
 deploy:
   strategy: git
   provider: pages
   cleanup: false
+  skip_cleanup: true
   github_token: $GH_TOKEN
   keep_history: true
   on:
