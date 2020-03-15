@@ -6,6 +6,7 @@ branches:
   only:
     - blog-resource
 script:
+  - hexo clean
   - hexo generate # generate static files
 deploy:
   strategy: git
