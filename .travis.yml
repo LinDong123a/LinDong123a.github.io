@@ -8,6 +8,8 @@ branches:
     - blog-resource
 script:
   - hexo generate # generate static files
+before_install:
+  - git submodule update --init --recursive
 deploy:
   strategy: git
   provider: pages
