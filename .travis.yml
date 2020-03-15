@@ -16,5 +16,6 @@ deploy:
   github_token: $GH_TOKEN
   keep_history: true
   on:
-    branch: master
+    branch: blog-resource
+  target_branch: master
   local_dir: public
