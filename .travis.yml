@@ -1,15 +1,12 @@
 os: linux
 language: node_js
-node_js:
-  - 10 # use nodejs v10 LTS
+node_js: stable # use nodejs v10 LTS
 cache: npm
 branches:
   only:
     - blog-resource
 script:
   - hexo generate # generate static files
-before_install:
-  - git submodule update --init --recursive
 deploy:
   strategy: git
   provider: pages
