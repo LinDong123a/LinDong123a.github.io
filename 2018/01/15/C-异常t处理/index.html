@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>C++异常处理 | Lds&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近在写一个工程，结果因为在异常处理方面没有，最近把代码成功地变成了一堆垃圾，于是乎选择重新做人，拿出《C++ Primer》重学一下C++的异常处理  在看异常处理的时候，我主要想知道的就只有三个方面：  异常产生后是如何被传递与匹配的 处理异常会对原来的flow of control造成什么样的影响 异常没有被处理会怎么样  由于我看的是英文版的《C++ Primer》，一些名词我不知道该怎">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++异常处理">
+<meta property="og:url" content="http://lindongsheng.github.io/2018/01/15/C-%E5%BC%82%E5%B8%B8t%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="Lds&#39;s Blog">
+<meta property="og:description" content="最近在写一个工程，结果因为在异常处理方面没有，最近把代码成功地变成了一堆垃圾，于是乎选择重新做人，拿出《C++ Primer》重学一下C++的异常处理  在看异常处理的时候，我主要想知道的就只有三个方面：  异常产生后是如何被传递与匹配的 处理异常会对原来的flow of control造成什么样的影响 异常没有被处理会怎么样  由于我看的是英文版的《C++ Primer》，一些名词我不知道该怎">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-01-15T05:05:28.000Z">
+<meta property="article:modified_time" content="2020-07-04T17:45:07.035Z">
+<meta property="article:author" content="Dongsheng Lin">
+<meta property="article:tag" content="Programming">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Lds&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Lds&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://lindongsheng.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-C-异常t处理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/01/15/C-%E5%BC%82%E5%B8%B8t%E5%A4%84%E7%90%86/" class="article-date">
+  <time datetime="2018-01-15T05:05:28.000Z" itemprop="datePublished">2018-01-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      C++异常处理
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>最近在写一个工程，结果因为在异常处理方面没有，最近把代码成功地变成了一堆垃圾，于是乎选择重新做人，拿出《C++ Primer》重学一下C++的异常处理</p>
+</blockquote>
+<p>在看异常处理的时候，我主要想知道的就只有三个方面：</p>
+<ol>
+<li>异常产生后是如何被传递与匹配的</li>
+<li>处理异常会对原来的flow of control造成什么样的影响</li>
+<li>异常没有被处理会怎么样</li>
+</ol>
+<p><strong>由于我看的是英文版的《C++ Primer》，一些名词我不知道该怎么翻译成中文名词，因此可能有些名词可能会直接用英文表达，郑重声明，这绝不是装逼</strong></p>
+<a id="more"></a>
+
+<h3 id="异常的产生，传递与匹配"><a href="#异常的产生，传递与匹配" class="headerlink" title="异常的产生，传递与匹配"></a>异常的产生，传递与匹配</h3><h4 id="产生"><a href="#产生" class="headerlink" title="产生"></a>产生</h4><p>在C++中，想要抛出异常直接用<code>throw expression</code>即可，在抛出异常后，用catch进行捕捉，整体格式如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="comment">//expressions with possible exception behavior</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span>(exception class/ exception object) &#123;</span><br><span class="line">  <span class="comment">//exception handlers</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span>() &#123;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>tips: 当我们想要捕捉全部的异常时，可以使用catch(…)来进行所有异常的匹配</p>
+</blockquote>
+<p>这样子，一旦try之中抛出了异常，就能用catch进行捕捉处理了。</p>
+<p>但上述这种做法在类的构造函数初始化时却行不通，因为在构造函数之中, initializer是先于异常处理被执行的，也就是说，当我们在初始赋值的过程中发生的异常，用形式并没有办法进行检测，因此C++11又定义了一种叫做<strong>function try block</strong>的模式。如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">Blob&lt;T&gt;::Blob(<span class="built_in">std</span>::<span class="built_in">initializer_list</span>&lt;T&gt; il) <span class="keyword">try</span>:</span><br><span class="line">data(<span class="built_in">std</span>::make_shared&lt;<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;T&gt;&gt;(il)) &#123;</span><br><span class="line">  <span class="comment">//expressions</span></span><br><span class="line">&#125; <span class="keyword">catch</span>(<span class="keyword">const</span> <span class="built_in">std</span>::bad_alloc &amp;e) &#123; handle_out_of_memory(e);&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="传递"><a href="#传递" class="headerlink" title="传递"></a>传递</h4><p>传递过程其实很好理解，对于嵌套的try代码块而言，执行过程为从内到外；至于整个程序的调用栈而言，自上到下，等最后到了main函数还是无法匹配时，调用<code>terminate</code>函数来结束整个程序。</p>
+<p>值得一提的是，在异常处理的过程中，它会逐个释放变量的内存，这里我们可以把throw当作一个函数的return语句，当throw之后，该函数的全部临时变量都会被自动释放，对于类而言，会调用其析构函数进行内存释放，而对于我们通过new产生的动态内存，则需要我们手动释放，读到这我也大概能明白《C++ Primer》为什么这么推崇我们使用容器了，毕竟容器能够在一定程度上实现内存的自动管理。<br><strong>但这里书里也强调了，类的析构函数必须保证没有再抛出异常，或者其抛出的异常已经在析构函数内部就能被处理，否则会直接调用<code>terminate</code>函数来结束整个程序</strong></p>
+<p>另一个要注意的地方就是如果我们抛出的异常值是一个指针的话，需要满足和函数返回值一样的限制条件，即不能是一个指向内部临时变量的指针。</p>
+<blockquote>
+<p>rethrow: 我们有时候可能会想要某个异常能够冒泡地被处理，如先被第一层的catch处理后，冒泡到上一层，      再次进行处理，此时我们就可以在第一层对异常的值进行处理后，通过<code>throw</code>语句直接上抛异常。如:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">catch</span>(my_error &amp;obj) &#123;</span><br><span class="line">  obj.status = errCodes:severeErr;</span><br><span class="line">  <span class="keyword">throw</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="匹配"><a href="#匹配" class="headerlink" title="匹配"></a>匹配</h4><p>异常的匹配主要依据是依赖于异常的类型，因而在<strong>catch</strong>的匹配条件中，在不需要异常对象的情况下，我们完成可以只填写异常的类型，也能实现匹配。但如果我们需要throw的对象的话，就可以将该异常定义为一个对象，如果需要获得抛出对象的修改权的话，可以用指针或者引用来获取。</p>
+<p>而另一个要关心的就是匹配的顺序，catch的匹配并不是按照重载那样按照类型的匹配程度来的，而是<strong>按顺序</strong>来进行匹配。因此如果我们返回的异常类型是一个多重继承的类的话，我们应当按照将catch按照继承的顺序反向排序，即让子类在前，父类在后。</p>
+<p>同时，在匹配的过程中，除了下述三类的类型转换以外，其它的类型转换都会失效。</p>
+<ol>
+<li>nonconst -&gt; const</li>
+<li>conversions from derived type to base type</li>
+<li>An array -&gt; a pointer to the type of the array; a function -&gt; a pointer to the type of function</li>
+</ol>
+<h3 id="异常对flow-of-control的影响"><a href="#异常对flow-of-control的影响" class="headerlink" title="异常对flow of control的影响"></a>异常对flow of control的影响</h3><p>当异常被抛出后，异常产生之后的代码都将不会被运行，而只有当异常被成功匹配并通过运行完相对应的catch的内部代码后，该catch并行的最后的一个catch结构之后的代码才会被执行。</p>
+<h3 id="没有被处理的异常"><a href="#没有被处理的异常" class="headerlink" title="没有被处理的异常"></a>没有被处理的异常</h3><p>如果一个异常一直无法得到匹配的话，就会直接调用<code>terminate</code>函数来中止整个程序。</p>
+<h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><p>当我们能够确认整个函数没有产生异常时，可以将其声明为<code>noexcept</code>，如：<code>void recoup(int) noexcept</code>。这里做能够缩小编译器编译出来的程序的体积。</p>
+<blockquote>
+<p>tips: 如果想要声明为<code>noexcept</code>，我们必须在函数每个声明和定义都加以声明。在成员函数时，应当处理const之后 ，override, final, =0之前</p>
+</blockquote>
+<h2 id="异常使用的一些技巧"><a href="#异常使用的一些技巧" class="headerlink" title="异常使用的一些技巧"></a>异常使用的一些技巧</h2><blockquote>
+<p><a href="http://culttt.com/2014/04/09/use-exception/" target="_blank" rel="noopener">资料来源</a></p>
+</blockquote>
+<p>总而言之，以下三点：</p>
+<ol>
+<li>只在真正异常的环境下再使用异常，如网络连接断开，这是异常。用户名输错，这不是异常</li>
+<li>异常不是错误，有些程序本身就应当是通过返回true/false/null的</li>
+<li>对于外部问题我们可以考虑使用异常处理</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://lindongsheng.github.io/2018/01/15/C-%E5%BC%82%E5%B8%B8t%E5%A4%84%E7%90%86/" data-id="ckc7xt5da0000cvr95zcsdq2n" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/C/" rel="tag">C++</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Programming/" rel="tag">Programming</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/01/16/Electron%E5%85%A5%E9%97%A8/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Electron入门
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/01/14/minimum-size-subarray-sum/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Minimum Size Subarray Sum</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/C/" rel="tag">C++</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Programming/" rel="tag">Programming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/" rel="tag">algorithm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/electron/" rel="tag">electron</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/C/" style="font-size: 10px;">C++</a> <a href="/tags/Linux/" style="font-size: 10px;">Linux</a> <a href="/tags/Programming/" style="font-size: 10px;">Programming</a> <a href="/tags/algorithm/" style="font-size: 20px;">algorithm</a> <a href="/tags/electron/" style="font-size: 10px;">electron</a> <a href="/tags/leetcode/" style="font-size: 15px;">leetcode</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/01/16/Electron%E5%85%A5%E9%97%A8/">Electron入门</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/15/C-%E5%BC%82%E5%B8%B8t%E5%A4%84%E7%90%86/">C++异常处理</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/14/minimum-size-subarray-sum/">Minimum Size Subarray Sum</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/14/find-the-duplicate-number/">Find the Duplicate Number</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/07/%E4%BA%8C%E7%BB%B4dp/">二维dp</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 Dongsheng Lin<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

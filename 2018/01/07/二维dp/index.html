@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>二维dp | Lds&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="想写这个主要是因为在写OJ被一道题目莫名坑了N久，直到后面后知后觉才发现是我之前把dp理解错了，导致我的状态转移设定出现了问题，在这里记录一下，省得自己一天老犯傻。 问题描述给定一个环形数组，要求你在这其中找$\leq$3个子序列，使其和最大。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二维dp">
+<meta property="og:url" content="http://lindongsheng.github.io/2018/01/07/%E4%BA%8C%E7%BB%B4dp/index.html">
+<meta property="og:site_name" content="Lds&#39;s Blog">
+<meta property="og:description" content="想写这个主要是因为在写OJ被一道题目莫名坑了N久，直到后面后知后觉才发现是我之前把dp理解错了，导致我的状态转移设定出现了问题，在这里记录一下，省得自己一天老犯傻。 问题描述给定一个环形数组，要求你在这其中找$\leq$3个子序列，使其和最大。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-01-07T05:13:46.000Z">
+<meta property="article:modified_time" content="2020-07-04T17:45:07.035Z">
+<meta property="article:author" content="Dongsheng Lin">
+<meta property="article:tag" content="algorithm">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Lds&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Lds&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://lindongsheng.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-二维dp" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/01/07/%E4%BA%8C%E7%BB%B4dp/" class="article-date">
+  <time datetime="2018-01-07T05:13:46.000Z" itemprop="datePublished">2018-01-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      二维dp
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>想写这个主要是因为在写OJ被一道题目莫名坑了N久，直到后面后知后觉才发现是我之前把dp理解错了，导致我的状态转移设定出现了问题，在这里记录一下，省得自己一天老犯傻。</p>
+<h4 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h4><p>给定一个环形数组，要求你在这其中找$\leq$3个子序列，使其和最大。</p>
+<a id="more"></a>
+
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><p>这里其实可以很简单地想到用动态规划来完成，然而，当时记错了一维动态规划的我活生生死在了状态转移方程的列写上，然后生命就这样过去了。<br>至于环形数组倒是满好解决的，让动态规划的时候，第一次一定包含第一个元素即可，这样时间复杂度也没高多少。</p>
+<h4 id="二维dp"><a href="#二维dp" class="headerlink" title="二维dp"></a>二维dp</h4><p>对于动态规划而言，个人认为比较重要的是找到一个状态转换方程，动态地更新局部最优解，从而得到最后的全局最优解。<br>首先就上述题目而言，对于第n段的第i个元素时，要找到此时对应的最优解，我们要考虑如下情况:</p>
+<ol>
+<li>将该元素直接接入到第n段的第i-1个元素后面</li>
+<li>将该元素自己成为第n段，同时遍历前n-1段与其相加</li>
+</ol>
+<p>通过比较上述两种情况，我们动态地更新其该元素的大小。但按照这种方式进行更新的话，我们会发现，这样在时间和空间上都有比较大的消耗，因此我们还需要对上述算法进行二次优化。</p>
+<p>通过回溯算法，我们发现，在考虑该元素自成一段的情况下，我们问题需要往前遍历n-1次来进行最大值的查找，但是该过程是与n无关的，也就是说，我们完成可以定义一个数组max来保留前n-1段下的最大值 ，这样我们就不需要记录前n-1段的全部信息，实现时间和空间上的改善。</p>
+<p>参考代码如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> <span class="built_in">max</span>[<span class="number">100</span>];</span><br><span class="line"><span class="keyword">int</span> dp[<span class="number">100</span>];</span><br><span class="line"><span class="keyword">int</span> input[<span class="number">100</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">  <span class="keyword">int</span> max_value = <span class="number">-10000</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">1</span>; j &lt; <span class="number">100</span>; j++) &#123;</span><br><span class="line">    dp[j] = Max(dp[j<span class="number">-1</span>]+input[j], <span class="built_in">max</span>[j<span class="number">-1</span>]+input[j]);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">max</span>[j<span class="number">-1</span>] = max_value;</span><br><span class="line">    max_value = Max(dp[j], <span class="built_in">max</span>[j]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>tips: 上面为了使代码的统一性，我多开辟了一个空间来使数组的计数从1开始，这样就不用简单是否为0然后单独处理了.</strong></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://lindongsheng.github.io/2018/01/07/%E4%BA%8C%E7%BB%B4dp/" data-id="ckc7xt5dv000acvr98wgqbtgw" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/algorithm/" rel="tag">algorithm</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/01/14/find-the-duplicate-number/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Find the Duplicate Number
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/01/07/shell%E4%B8%AD%E8%BF%90%E8%A1%8Csudo/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">shell中运行sudo</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/C/" rel="tag">C++</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Programming/" rel="tag">Programming</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/" rel="tag">algorithm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/electron/" rel="tag">electron</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/C/" style="font-size: 10px;">C++</a> <a href="/tags/Linux/" style="font-size: 10px;">Linux</a> <a href="/tags/Programming/" style="font-size: 10px;">Programming</a> <a href="/tags/algorithm/" style="font-size: 20px;">algorithm</a> <a href="/tags/electron/" style="font-size: 10px;">electron</a> <a href="/tags/leetcode/" style="font-size: 15px;">leetcode</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/01/16/Electron%E5%85%A5%E9%97%A8/">Electron入门</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/15/C-%E5%BC%82%E5%B8%B8t%E5%A4%84%E7%90%86/">C++异常处理</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/14/minimum-size-subarray-sum/">Minimum Size Subarray Sum</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/14/find-the-duplicate-number/">Find the Duplicate Number</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/07/%E4%BA%8C%E7%BB%B4dp/">二维dp</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 Dongsheng Lin<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
